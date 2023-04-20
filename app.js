@@ -14,6 +14,15 @@ mongoose.connect("mongodb://127.0.0.1:27017/mestodb", {
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  req.user = {
+    _id: '644044d6b49d66620e8cdf8d' // вставьте сюда _id созданного в предыдущем пункте пользователя
+  };
+
+  next();
+});
+
 app.use('/', router);
 
 app.listen(PORT, () => {
