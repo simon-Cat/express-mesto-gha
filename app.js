@@ -1,15 +1,29 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const bodyParser = require('body-parser');
 const router = require('./routes');
 
-const PORT = 3000;
+const { PORT = 3000 } = process.env;
+
+
 const app = express();
 
-app.use('/', router);
+mongoose.connect("mongodb://127.0.0.1:27017/mestodb", {
+  useNewUrlParser: true
+}).then(() => console.log('BD Access!'));
 
-mongoose.connect("mongodb://localhost:27017/mestodb").then(() => {
-  console.log("Connected!");
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  req.user = {
+    _id: '644044d6b49d66620e8cdf8d' // вставьте сюда _id созданного в предыдущем пункте пользователя
+  };
+
+  next();
 });
+
+app.use('/', router);
 
 app.listen(PORT, () => {
   console.log(`Слушаю порт - ${PORT}`);
