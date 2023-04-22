@@ -1,7 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require('body-parser');
-const router = require('./routes');
+const cards = require('./routes/cards');
+const users = require('./routes/users');
+
 
 const { PORT = 3000 } = process.env;
 
@@ -16,14 +18,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
+  // id пользователя
   req.user = {
-    _id: '644181a26513aa4c3d4b92be' // вставьте сюда _id созданного в предыдущем пункте пользователя
+    _id: '6444084ce521a9ef30be3e88'
   };
 
   next();
 });
 
-app.use('/', router);
+app.use('/', cards);
+app.use('/', users);
+
 
 app.listen(PORT, () => {
   console.log(`Слушаю порт - ${PORT}`);
