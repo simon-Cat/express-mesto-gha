@@ -5,17 +5,32 @@ const userSchema = new mongoose.Schema({
     type: String,
     minlength: 2,
     maxlength: 30,
-    required: true
+    required: true,
+    validate: {
+      validator(v) {
+        return (v.length >= 2 && v.length <= 30);
+      }
+    }
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 30,
-    required: true
+    required: true,
+    validate: {
+      validator(v) {
+        return (v.length >= 2 && v.length <= 30);
+      }
+    }
   },
   avatar: {
     type: String,
-    required: true
+    required: true,
+    validate: {
+      validator(v) {
+        return (v.length > 0);
+      }
+    }
   }
 })
 
