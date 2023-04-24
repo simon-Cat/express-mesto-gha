@@ -2,11 +2,11 @@
   "name": "express-mesto-gha",
   "version": "1.0.0",
   "description": "https://github.com/simon-Cat/express-mesto-gha",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "lint": "npx eslint"
+    "lint": "npx eslint ."
   },
   "repository": {
     "type": "git",
