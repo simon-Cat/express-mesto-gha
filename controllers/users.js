@@ -1,4 +1,6 @@
 const { mongoose } = require('mongoose');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { handleError } = require('../utils/handleError');
 
@@ -25,9 +27,10 @@ module.exports.getUser = (req, res) => {
 module.exports.createUser = (req, res) => {
   const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar, email, password })
-    .then((user) => res.status(201).send({ data: user }))
-    .catch((error) => handleError(error, res));
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({ name, about, avatar, email, password: hash })
+      .then((user) => res.status(201).send({ data: user }))
+      .catch((error) => handleError(error, res)));
 };
 
 module.exports.updateUserData = (req, res) => {
