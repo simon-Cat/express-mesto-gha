@@ -1,6 +1,8 @@
 const { mongoose } = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { handleError } = require('../utils/handleError');
 
@@ -31,6 +33,21 @@ module.exports.createUser = (req, res) => {
     .then((hash) => User.create({ name, about, avatar, email, password: hash })
       .then((user) => res.status(201).send({ data: user }))
       .catch((error) => handleError(error, res)));
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-super-secret-key', { expiresIn: '7d' });
+      res
+        .cookie('jwt', token, { httpOnly: true })
+        .end();
+    })
+    .catch((error) => {
+      res.status(401).send({ message: error.message });
+    });
 };
 
 module.exports.updateUserData = (req, res) => {
