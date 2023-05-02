@@ -11,7 +11,6 @@ module.exports.getCards = (req, res) => {
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const ownerID = req.user._id;
-  console.log(ownerID);
 
   Card.create({ name, link, owner: ownerID })
     .then((card) => res.status(201).send({ data: card }))
@@ -19,8 +18,21 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.removeCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then(() => res.send(`Карточка с id: ${req.params.cardId} успешно удалена!`))
+  const { cardId } = req.params;
+  const userId = req.user._id;
+
+  Card.findById(cardId)
+    .then((card) => {
+      const ownerId = card.owner._id;
+
+      if (!(ownerId.toString() === userId)) {
+        res.send({ message: 'У вас нет прав для удаления карточек других пользователей!' });
+        return;
+      }
+
+      Card.findByIdAndRemove(cardId)
+        .then(() => res.send(`Карточка с id: ${cardId} успешно удалена!`));
+    })
     .catch((error) => handleError(error, res));
 };
 
