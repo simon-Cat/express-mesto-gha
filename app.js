@@ -23,13 +23,13 @@ app.use(bodyParser.json());
 
 //   next();
 // });
+app.post('/signin', login);
+app.post('/signup', createUser);
+
 app.use(auth);
 
 app.use('/cards', cards);
 app.use('/users', users);
-
-app.post('/signin', login);
-app.post('/signup', createUser);
 
 app.use((req, res, next) => {
   res.status(404).send('Страница не найдена!');
