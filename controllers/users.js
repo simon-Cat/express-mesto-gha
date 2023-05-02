@@ -26,6 +26,20 @@ module.exports.getUser = (req, res) => {
     .catch((error) => handleError(error, res));
 };
 
+module.exports.getMeInfo = (req, res) => {
+  const userId = req.user._id;
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        const error = new mongoose.Error.DocumentNotFoundError();
+        throw error;
+      }
+      res.send({ data: user });
+    })
+    .catch((error) => handleError(error, res));
+};
+
 module.exports.createUser = (req, res) => {
   const { name, about, avatar, email, password } = req.body;
 

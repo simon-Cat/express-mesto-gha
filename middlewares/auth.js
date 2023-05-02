@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
-  if (!authorization || authorization.strartWith('Bearer ')) {
+  if (!authorization || !authorization.startsWith('Bearer ')) {
     return res.status(401).send({ message: 'Необходимо авторизоваться.' });
   }
 
@@ -14,7 +14,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'some-super-secret-key');
   } catch (err) {
-    return res.status(401).send({ message: err.message });
+    return res.status(401).send({ message: 'Необходимо авторизоваться.' });
   }
 
   req.user = payload;
