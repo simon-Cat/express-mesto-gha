@@ -6,8 +6,6 @@ const {
 users.get('/', getUsers);
 users.get('/:userId', getUser);
 
-users.post('/', createUser);
-
 users.patch('/me', updateUserData);
 users.patch('/me/avatar', updateUserAvatar);
 

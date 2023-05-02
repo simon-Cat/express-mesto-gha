@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { cards, users } = require('./routes');
+const { login, createUser } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 
@@ -25,6 +26,9 @@ app.use((req, res, next) => {
 
 app.use('/cards', cards);
 app.use('/users', users);
+
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.use((req, res, next) => {
   res.status(404).send('Страница не найдена!');
