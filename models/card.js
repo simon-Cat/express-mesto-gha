@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
-// const { celebrate, Joi } = require('celebrate');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -12,6 +11,8 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    trim: true,
+    match: /^(http|https):\/\/(www\.)?[a-zA-Z0-9\S)]#?/,
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
