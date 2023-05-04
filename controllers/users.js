@@ -1,55 +1,54 @@
-const { mongoose } = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { handleError } = require('../utils/handleError');
+const { BadRequestError, NotFoundError, ConflictError } = require('../errors');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((error) => handleError(error, res));
+    .catch(() => next(new NotFoundError('Данные о пользователях не найдены')));
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
     .then((user) => {
-      if (!user) {
-        const error = new mongoose.Error.DocumentNotFoundError();
-        throw error;
-      }
       res.send({ data: user });
     })
-    .catch((error) => handleError(error, res));
+    .catch(() => next(new NotFoundError('Пользователь не найден')));
 };
 
-module.exports.getMeInfo = (req, res) => {
+module.exports.getMeInfo = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
     .then((user) => {
-      if (!user) {
-        const error = new mongoose.Error.DocumentNotFoundError();
-        throw error;
-      }
       res.send({ data: user });
     })
-    .catch((error) => handleError(error, res));
+    .catch(() => next(new NotFoundError('Данные о пользователе не найдены')));
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body;
 
   bcrypt.hash(password, 10)
     .then((hash) => User.create({ name, about, avatar, email, password: hash })
-      .then((user) => res.status(201).send({ data: user }))
-      .catch((error) => handleError(error, res)));
+      .then((user) => {
+        res.status(201).send({ data: user });
+      })
+      .catch((err) => {
+        if (err.code === 11000) {
+          next(new ConflictError('Пользователь с такими данными уже существует'));
+          return;
+        }
+        next(new BadRequestError('Указаны некорректные данные'));
+      }));
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -59,12 +58,10 @@ module.exports.login = (req, res) => {
         .cookie('jwt', token, { httpOnly: true })
         .end();
     })
-    .catch((error) => {
-      res.status(401).send({ message: error.message });
-    });
+    .catch((err) => next(err));
 };
 
-module.exports.updateUserData = (req, res) => {
+module.exports.updateUserData = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
 
@@ -72,17 +69,16 @@ module.exports.updateUserData = (req, res) => {
     .then(() => {
       res.send({ name, about });
     })
-    .catch((error) => handleError(error, res));
+    .catch(() => next(new BadRequestError('Указаны некорректные данные')));
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const userId = req.user._id;
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
-      console.log('Прошел!');
       res.send({ data: user });
     })
-    .catch((error) => handleError(error, res));
+    .catch(() => next(new BadRequestError('Указаны некорректные данные')));
 };
