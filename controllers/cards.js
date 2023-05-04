@@ -47,7 +47,7 @@ module.exports.likeCard = (req, res, next) => {
 
   Card.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
     .then(() => res.send('Лайк =))!'))
-    .catch((error) => next(error));
+    .catch(() => next(new NotFoundError('Невозможно установить лайк несуществующей карточке')));
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -56,5 +56,5 @@ module.exports.dislikeCard = (req, res, next) => {
 
   Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
     .then(() => res.send('Дизлайк =((!'))
-    .catch((error) => next(error));
+    .catch(() => next(new NotFoundError('Невозможно убрать лайк с несуществующей карточки')));
 };

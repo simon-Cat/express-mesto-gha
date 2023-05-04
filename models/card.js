@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+// eslint-disable-next-line import/no-extraneous-dependencies
+// const { celebrate, Joi } = require('celebrate');
 
 const cardSchema = new mongoose.Schema({
   name: {
