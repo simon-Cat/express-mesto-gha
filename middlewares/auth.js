@@ -7,21 +7,19 @@ module.exports = (req, res, next) => {
 
   try {
     if (!authorization || !authorization.startsWith('Bearer ')) {
-      throw new AuthorizationError('Необходима авторизация');
+      return next(new AuthorizationError('Необходима авторизация'));
     }
     const token = authorization.replace('Bearer ', '');
 
     payload = jwt.verify(token, 'some-super-secret-key');
   } catch (e) {
     if (e.name === 'JsonWebTokenError') {
-      next(new AuthorizationError('Необходима авторизация'));
-      return;
+      return next(new AuthorizationError('Необходима авторизация'));
     }
-    next(e);
-    return;
+    return next(e);
   }
 
   req.user = payload;
 
-  next();
+  return next();
 };

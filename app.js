@@ -1,10 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const {
-  celebrate, errors, Segments, Joi,
-// eslint-disable-next-line import/no-extraneous-dependencies
-} = require('celebrate');
+const { errors } = require('celebrate');
+const { validateSignin, validateSignup } = require('./utils/requestValidation');
 const { cards, users } = require('./routes');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -19,30 +16,12 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
 }).then(() => console.log('BD Access!'));
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-app.post('/signin', celebrate({
-  [Segments.BODY]: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
-  }),
-}), login);
+app.post('/signin', validateSignin(), login);
 
-app.post('/signup', celebrate({
-  [Segments.BODY]: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
-  }),
-}), createUser);
-
-// using celebrate to validate all incoming requests
-// to ensure the authorization header
-app.use(celebrate({
-  [Segments.HEADERS]: Joi.object({
-    authorization: Joi.string().required(),
-  }).unknown(),
-}));
+app.post('/signup', validateSignup(), createUser);
 
 app.use(auth);
 
@@ -52,18 +31,15 @@ app.use('/users', users);
 // celebrate error handler
 app.use(errors());
 
+// incorrect route error handler
+app.use((req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
+});
+
 // centralized error handler
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
-
-  next();
-});
-
-// incorrect route error handler
-app.use((req, res, next) => {
-  const error = new NotFoundError('Страница не найдена');
-  res.status(error.statusCode).send({ message: error.message });
 
   next();
 });

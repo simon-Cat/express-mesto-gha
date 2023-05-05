@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-// eslint-disable-next-line import/no-extraneous-dependencies
+const urlRegexp = require('../utils/urlRegexp');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -12,7 +12,7 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    match: /^(http|https):\/\/(www\.)?[a-zA-Z0-9\S)]#?/,
+    match: urlRegexp,
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

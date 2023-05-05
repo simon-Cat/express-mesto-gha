@@ -4,6 +4,7 @@ const validator = require('validator');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs');
 const { AuthorizationError } = require('../errors');
+const urlRegexp = require('../utils/urlRegexp');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -21,7 +22,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     trim: true,
-    match: /^(http|https):\/\/(www\.)?[a-zA-Z0-9\S)]#?/,
+    match: urlRegexp,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {
