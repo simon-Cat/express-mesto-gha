@@ -1,8 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const {
+  celebrate, errors, Segments, Joi,
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { celebrate, errors, Segments, Joi } = require('celebrate');
+} = require('celebrate');
 const { cards, users } = require('./routes');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -52,10 +54,10 @@ app.use(errors());
 
 // centralized error handler
 app.use((err, req, res, next) => {
-  console.log(err);
   const { statusCode = 500, message } = err;
-
   res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+
+  next();
 });
 
 // incorrect route error handler

@@ -1,5 +1,7 @@
 const Card = require('../models/card');
-const { AuthorizationError, BadRequestError, NotFoundError, ConflictError } = require('../errors');
+const {
+  BadRequestError, NotFoundError, ConflictError, ForbiddenError,
+} = require('../errors');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -26,7 +28,7 @@ module.exports.removeCard = (req, res, next) => {
       const ownerId = card.owner._id;
 
       if (!(ownerId.toString() === userId)) {
-        throw new AuthorizationError('У вас нет прав для удаления карточек других пользователей');
+        throw new ForbiddenError('У вас нет прав для удаления карточек других пользователей');
       }
 
       Card.findByIdAndRemove(cardId)
