@@ -30,19 +30,19 @@ module.exports.validateCreateCard = () => celebrate({
 
 module.exports.validateSetLikeToCard = () => celebrate({
   [Segments.PARAMS]: Joi.object().keys({
-    cardId: Joi.string(),
+    cardId: Joi.string().hex().required(),
   }),
 });
 
 module.exports.validateRemoveLikeFromCard = () => celebrate({
   [Segments.PARAMS]: Joi.object().keys({
-    cardId: Joi.string(),
+    cardId: Joi.string().hex().required(),
   }),
 });
 
 module.exports.validateRemoveCard = () => celebrate({
   [Segments.PARAMS]: Joi.object().keys({
-    cardId: Joi.string(),
+    cardId: Joi.string().hex().required(),
   }),
 });
 

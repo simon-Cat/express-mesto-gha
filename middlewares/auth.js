@@ -14,9 +14,10 @@ module.exports = (req, res, next) => {
     payload = jwt.verify(token, 'some-super-secret-key');
   } catch (e) {
     if (e.name === 'JsonWebTokenError') {
-      return next(new AuthorizationError('Необходима авторизация'));
+      next(new AuthorizationError('Необходима авторизация'));
+    } else {
+      next(e);
     }
-    return next(e);
   }
 
   req.user = payload;

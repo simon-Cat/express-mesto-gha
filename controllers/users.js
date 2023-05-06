@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { NotFoundError, ConflictError } = require('../errors');
+const { BadRequestError, NotFoundError, ConflictError } = require('../errors');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -16,14 +16,18 @@ module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
+    .orFail()
     .then((user) => {
       res.send({ data: user });
     })
     .catch((err) => {
       if (err instanceof Error.CastError) {
-        next(new NotFoundError('Пользователь не найден'));
+        next(new BadRequestError('Неверно указан id пользователя'));
+      } else if (err instanceof Error.DocumentNotFoundError) {
+        next(new NotFoundError(`Пользователь с id ${userId}с не найден`));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -31,14 +35,19 @@ module.exports.getMeInfo = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
+    .orFail()
     .then((user) => {
-      if (!user) {
-        next(new NotFoundError('Данные о пользователе не найдены'));
-        return;
-      }
       res.send({ data: user });
     })
-    .catch((err) => next(err));
+    .catch((err) => {
+      if (err instanceof Error.CastError) {
+        next(new BadRequestError('Неверно указан id пользователя'));
+      } else if (err instanceof Error.DocumentNotFoundError) {
+        next(new NotFoundError(`Пользователь с id ${userId}с не найден`));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -64,9 +73,9 @@ module.exports.createUser = (req, res, next) => {
       .catch((err) => {
         if (err.code === 11000) {
           next(new ConflictError('Пользователь с такими данными уже существует'));
-          return;
+        } else {
+          next(err);
         }
-        next(err);
       }));
 };
 
@@ -87,29 +96,53 @@ module.exports.updateUserData = (req, res, next) => {
   const userId = req.user._id;
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
-    .then(() => {
-      res.send({
-        data: {
-          name,
-          about,
-        },
-      });
+  User.findById(userId)
+    .orFail()
+    .then((user) => {
+      user.updateOne({ name, about }, { new: true, runValidators: true })
+        .then(() => {
+          res.send({
+            data: {
+              name,
+              about,
+            },
+          });
+        });
     })
-    .catch((err) => next(err));
+    .catch((err) => {
+      if (err instanceof Error.CastError) {
+        next(new BadRequestError('Неверно указан id пользователя'));
+      } else if (err instanceof Error.DocumentNotFoundError) {
+        next(new NotFoundError(`Пользователь с id ${userId}с не найден`));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
-  const userId = req.user._id;
+  const userId = '6653ce38c33ef67413f9370e';
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
-    .then(() => {
-      res.send({
-        data: {
-          avatar,
-        },
-      });
+  User.findById(userId)
+    .orFail()
+    .then((user) => {
+      user.updateOne({ avatar }, { new: true, runValidators: true })
+        .then(() => {
+          res.send({
+            data: {
+              avatar,
+            },
+          });
+        });
     })
-    .catch((err) => next(err));
+    .catch((err) => {
+      if (err instanceof Error.CastError) {
+        next(new BadRequestError('Неверно указан id пользователя'));
+      } else if (err instanceof Error.DocumentNotFoundError) {
+        next(new NotFoundError(`Пользователь с id ${userId}с не найден`));
+      } else {
+        next(err);
+      }
+    });
 };
