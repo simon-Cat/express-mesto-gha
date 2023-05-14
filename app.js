@@ -6,6 +6,7 @@ const { cards, users } = require('./routes');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { NotFoundError } = require('./errors');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 
@@ -19,6 +20,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(requestLogger);
+
 app.post('/signin', validateSignin(), login);
 
 app.post('/signup', validateSignup(), createUser);
@@ -27,6 +30,8 @@ app.use(auth);
 
 app.use('/cards', cards);
 app.use('/users', users);
+
+app.use(errorLogger);
 
 // celebrate error handler
 app.use(errors());
